@@ -26,20 +26,20 @@ export class HistoryObserver {
 
   private subscribe() {
     const on = window.addEventListener;
-    on('load', this._onLoad, false);
-    on('popstate', this._onPopState, false);
-    on('hashchange', this._onHashChange, false);
-    on<any>('pushstate', this._onPushState, false);
-    on<any>('replacestate', this._onReplaceState, false);
+    on('load', this._onLoad.bind(this), false);
+    on('popstate', this._onPopState.bind(this), false);
+    on('hashchange', this._onHashChange.bind(this), false);
+    on<any>('pushstate', this._onPushState.bind(this), false);
+    on<any>('replacestate', this._onReplaceState.bind(this), false);
   }
 
   private unsubscribe() {
     const off = window.removeEventListener;
-    off('load', this._onLoad, false);
-    off('popstate', this._onPopState, false);
-    off('hashchange', this._onHashChange, false);
-    off<any>('pushstate', this._onPushState, false);
-    off<any>('replacestate', this._onReplaceState, false);
+    off('load', this._onLoad.bind(this), false);
+    off('popstate', this._onPopState.bind(this), false);
+    off('hashchange', this._onHashChange.bind(this), false);
+    off<any>('pushstate', this._onPushState.bind(this), false);
+    off<any>('replacestate', this._onReplaceState.bind(this), false);
   }
 
   /**
