@@ -32,5 +32,8 @@ observer.onReplaceState(payload => {
   console.log('onReplaceState', payload);
 });
 
-// @ts-ignore
-window.observer = observer;
+const observer2 = new HistoryObserver();
+
+observer2.onHistoryChange(payload => {
+  console.log('onHistoryChange2', payload);
+});
