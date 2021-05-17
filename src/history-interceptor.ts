@@ -4,6 +4,7 @@ import { PushStateEventDetail } from './event';
  * 拦截 `history.pushState()`/`history.replaceState()` 补发自定义事件
  */
 export function interceptHistory() {
+  const eventTarget = new EventTarget();
   const ps = Object.getOwnPropertyDescriptor(History.prototype, 'pushState');
   const rs = Object.getOwnPropertyDescriptor(History.prototype, 'replaceState');
 
@@ -15,7 +16,7 @@ export function interceptHistory() {
       value: (data: any, title: string, url?: string | null) => {
         const oldURL = window.location.href;
         pushState.call(history, data, title, url);
-        window.dispatchEvent(
+        eventTarget.dispatchEvent(
           new CustomEvent<PushStateEventDetail>('pushstate', {
             detail: {
               state: data,
@@ -39,7 +40,7 @@ export function interceptHistory() {
       value: (data: any, title: string, url?: string | null) => {
         const oldURL = window.location.href;
         replaceState.call(history, data, title, url);
-        window.dispatchEvent(
+        eventTarget.dispatchEvent(
           new CustomEvent<PushStateEventDetail>('replacestate', {
             detail: {
               state: data,
@@ -54,6 +55,8 @@ export function interceptHistory() {
   } else {
     console.error('[interceptHistory] 不支持拦截 `history.replaceState()`');
   }
+
+  return eventTarget;
 }
 
 /**

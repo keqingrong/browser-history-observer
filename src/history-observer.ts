@@ -13,123 +13,125 @@ import {
 } from './types';
 
 export class HistoryObserver {
-  private emitter = mitt();
   private debug = false;
+  private emitter = mitt();
+  private eventTarget: EventTarget = interceptHistory();
 
   constructor(options: Partial<Options> = {}) {
     if (options.debug) {
       this.debug = options.debug;
     }
-    interceptHistory();
     this.subscribe();
   }
 
-  private subscribe() {
-    const on = window.addEventListener;
-    on('load', this._onLoad.bind(this), false);
-    on('popstate', this._onPopState.bind(this), false);
-    on('hashchange', this._onHashChange.bind(this), false);
-    on<any>('pushstate', this._onPushState.bind(this), false);
-    on<any>('replacestate', this._onReplaceState.bind(this), false);
-  }
+  private subscribe = () => {
+    const et = this.eventTarget;
+    et.addEventListener('pushstate', this.onPushStateInternal, false);
+    et.addEventListener('replacestate', this.onReplaceStateInternal, false);
 
-  private unsubscribe() {
-    const off = window.removeEventListener;
-    off('load', this._onLoad.bind(this), false);
-    off('popstate', this._onPopState.bind(this), false);
-    off('hashchange', this._onHashChange.bind(this), false);
-    off('pushstate', this._onPushState.bind(this), false);
-    off('replacestate', this._onReplaceState.bind(this), false);
-  }
+    window.addEventListener('load', this.onLoadInternal, false);
+    window.addEventListener('popstate', this.onPopStateInternal, false);
+    window.addEventListener('hashchange', this.onHashChangeInternal, false);
+  };
+
+  private unsubscribe = () => {
+    const et = this.eventTarget;
+    et.removeEventListener('pushstate', this.onPushStateInternal, false);
+    et.removeEventListener('replacestate', this.onReplaceStateInternal, false);
+
+    window.removeEventListener('load', this.onLoadInternal, false);
+    window.removeEventListener('popstate', this.onPopStateInternal, false);
+    window.removeEventListener('hashchange', this.onHashChangeInternal, false);
+  };
 
   /**
    * 发送消息
    */
-  private emit(type: EventType, payload: any) {
+  private emit = (type: EventType, payload: any) => {
     this.debug && log(type, payload);
     this.emitter.emit(type, payload);
-  }
+  };
 
   /**
    * 监听 `load` 事件
    */
-  private _onLoad() {
+  private onLoadInternal = () => {
     const type = 'load';
     const payload = { url: window.location.href };
     this.emit(type, payload);
-    this._onHistoryChange({ type, state: null, ...payload });
-  }
+    this.onHistoryChangeInternal({ type, state: null, ...payload });
+  };
 
   /**
    * 监听 `popstate` 事件
    */
-  private _onPopState(event: PopStateEvent) {
+  private onPopStateInternal = (event: PopStateEvent) => {
     const type = 'popstate';
     const payload = { url: window.location.href, state: event.state };
     this.emit(type, payload);
-    this._onHistoryChange({ type, ...payload });
-  }
+    this.onHistoryChangeInternal({ type, ...payload });
+  };
 
   /**
    * 监听 `history.pushState()` 操作
    */
-  private _onPushState(event: Event) {
+  private onPushStateInternal = (event: Event) => {
     const { detail } = event as CustomEvent<PushStateEventDetail>;
     const { oldURL, newURL, state } = detail;
     const type = 'pushstate';
     const payload = { url: window.location.href, state };
     this.emit(type, payload);
-    this._onHistoryChange({ type, ...payload });
+    this.onHistoryChangeInternal({ type, ...payload });
     if (!isHashEqual(oldURL, newURL)) {
-      this._onHistoryHashChange({ type, oldURL, newURL });
+      this.onHistoryHashChangeInternal({ type, oldURL, newURL });
     }
-  }
+  };
 
   /**
    * 监听 `history.replaceState()` 操作
    */
-  private _onReplaceState(event: Event) {
+  private onReplaceStateInternal = (event: Event) => {
     const { detail } = event as CustomEvent<PushStateEventDetail>;
     const { oldURL, newURL, state } = detail;
     const type = 'replacestate';
     const payload = { url: window.location.href, state };
     this.emit(type, payload);
-    this._onHistoryChange({ type, ...payload });
+    this.onHistoryChangeInternal({ type, ...payload });
     if (!isHashEqual(oldURL, newURL)) {
-      this._onHistoryHashChange({ type, oldURL, newURL });
+      this.onHistoryHashChangeInternal({ type, oldURL, newURL });
     }
-  }
+  };
 
   /**
    * 监听合成的 `historychange` 事件
    */
-  private _onHistoryChange(params: HistoryChangePayload) {
+  private onHistoryChangeInternal = (params: HistoryChangePayload) => {
     const { type, url, state } = params;
     const syntheticType = 'historychange';
     const payload = { type, url, state };
     this.emit(syntheticType, payload);
-  }
+  };
 
   /**
    * 监听 `hashchange` 事件
    */
-  private _onHashChange(event: HashChangeEvent) {
+  private onHashChangeInternal = (event: HashChangeEvent) => {
     const { oldURL, newURL } = event;
     const type = 'hashchange';
     const payload = { oldURL, newURL };
     this.emit(type, payload);
-    this._onHistoryHashChange({ type, ...payload });
-  }
+    this.onHistoryHashChangeInternal({ type, ...payload });
+  };
 
   /**
    * 监听合成的 `historyhashchange` 事件
    */
-  private _onHistoryHashChange(params: HistoryHashChangePayload) {
+  private onHistoryHashChangeInternal = (params: HistoryHashChangePayload) => {
     const { type, oldURL, newURL } = params;
     const syntheticType = 'historyhashchange';
     const payload = { type, oldURL, newURL };
     this.emit(syntheticType, payload);
-  }
+  };
 
   /**
    * 释放资源
