@@ -2,6 +2,7 @@ import { PushStateEventDetail } from './event';
 
 /**
  * 拦截 `history.pushState()`/`history.replaceState()` 补发自定义事件
+ * FIXME: 如果实例化多个 `HistoryObserver` 目前只有最后一个能拦截生效
  */
 export function interceptHistory() {
   const eventTarget = new EventTarget();
