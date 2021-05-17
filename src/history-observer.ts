@@ -24,6 +24,9 @@ export class HistoryObserver {
     this.subscribe();
   }
 
+  /**
+   * 订阅事件
+   */
   private subscribe = () => {
     const et = this.eventTarget;
     et.addEventListener('pushstate', this.onPushStateInternal, false);
@@ -34,6 +37,9 @@ export class HistoryObserver {
     window.addEventListener('hashchange', this.onHashChangeInternal, false);
   };
 
+  /**
+   * 取消事件订阅
+   */
   private unsubscribe = () => {
     const et = this.eventTarget;
     et.removeEventListener('pushstate', this.onPushStateInternal, false);

@@ -61,6 +61,8 @@ export function interceptHistory() {
 
 /**
  * 恢复 `history.pushState()`/`history.replaceState()` 原始行为
+ * NOTE: 注意这样会销毁掉所有对 `pushState`/`replaceState` 的拦截操作，
+ * 超出 `interceptHistory()` 的范围。
  */
 export function undoInterceptHistory() {
   const ps = Object.getOwnPropertyDescriptor(History.prototype, 'pushState');
