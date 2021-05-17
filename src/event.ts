@@ -1,3 +1,9 @@
+export interface PushStateEventDetail {
+  state: any;
+  newURL: string;
+  oldURL: string;
+}
+
 export interface PushStateEventInit extends EventInit {
   state?: any;
   newURL?: string;

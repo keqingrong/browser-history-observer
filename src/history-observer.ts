@@ -1,5 +1,5 @@
 import mitt, { Handler } from 'mitt';
-import { PushStateEvent, ReplaceStateEvent } from './event';
+import { PushStateEventDetail } from './event';
 import { interceptHistory, undoInterceptHistory } from './history-interceptor';
 import { isHashEqual, log } from './utils';
 import {
@@ -38,8 +38,8 @@ export class HistoryObserver {
     off('load', this._onLoad.bind(this), false);
     off('popstate', this._onPopState.bind(this), false);
     off('hashchange', this._onHashChange.bind(this), false);
-    off<any>('pushstate', this._onPushState.bind(this), false);
-    off<any>('replacestate', this._onReplaceState.bind(this), false);
+    off('pushstate', this._onPushState.bind(this), false);
+    off('replacestate', this._onReplaceState.bind(this), false);
   }
 
   /**
@@ -73,8 +73,9 @@ export class HistoryObserver {
   /**
    * 监听 `history.pushState()` 操作
    */
-  private _onPushState(event: PushStateEvent) {
-    const { oldURL, newURL, state } = event;
+  private _onPushState(event: Event) {
+    const { detail } = event as CustomEvent<PushStateEventDetail>;
+    const { oldURL, newURL, state } = detail;
     const type = 'pushstate';
     const payload = { url: window.location.href, state };
     this.emit(type, payload);
@@ -87,8 +88,9 @@ export class HistoryObserver {
   /**
    * 监听 `history.replaceState()` 操作
    */
-  private _onReplaceState(event: ReplaceStateEvent) {
-    const { oldURL, newURL, state } = event;
+  private _onReplaceState(event: Event) {
+    const { detail } = event as CustomEvent<PushStateEventDetail>;
+    const { oldURL, newURL, state } = detail;
     const type = 'replacestate';
     const payload = { url: window.location.href, state };
     this.emit(type, payload);

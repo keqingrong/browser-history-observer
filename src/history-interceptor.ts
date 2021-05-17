@@ -1,4 +1,4 @@
-import { PushStateEvent, ReplaceStateEvent } from './event';
+import { PushStateEventDetail } from './event';
 
 /**
  * 拦截 `history.pushState()`/`history.replaceState()` 补发自定义事件
@@ -16,10 +16,12 @@ export function interceptHistory() {
         const oldURL = window.location.href;
         pushState.call(history, data, title, url);
         window.dispatchEvent(
-          new PushStateEvent('pushstate', {
-            state: data,
-            oldURL,
-            newURL: window.location.href
+          new CustomEvent<PushStateEventDetail>('pushstate', {
+            detail: {
+              state: data,
+              oldURL,
+              newURL: window.location.href
+            }
           })
         );
       },
@@ -38,10 +40,12 @@ export function interceptHistory() {
         const oldURL = window.location.href;
         replaceState.call(history, data, title, url);
         window.dispatchEvent(
-          new ReplaceStateEvent('replacestate', {
-            state: data,
-            oldURL,
-            newURL: window.location.href
+          new CustomEvent<PushStateEventDetail>('replacestate', {
+            detail: {
+              state: data,
+              oldURL,
+              newURL: window.location.href
+            }
           })
         );
       },
