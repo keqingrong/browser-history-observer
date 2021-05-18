@@ -74,7 +74,6 @@ export function interceptHistory(overwrite = false) {
  */
 export function undoInterceptHistory(overwrite = false) {
   if (ps && ps.configurable && typeof ps.value === 'function') {
-    oldPushState = history.pushState;
     const pushState = overwrite
       ? (ps.value as History['pushState'])
       : oldPushState;
@@ -89,7 +88,6 @@ export function undoInterceptHistory(overwrite = false) {
   }
 
   if (rs && rs.configurable && typeof rs.value === 'function') {
-    oldReplaceState = history.replaceState;
     const replaceState = overwrite
       ? (rs.value as History['replaceState'])
       : oldReplaceState;
