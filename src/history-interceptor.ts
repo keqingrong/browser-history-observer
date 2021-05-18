@@ -1,16 +1,22 @@
 import { PushStateEventDetail } from './event';
 
+const ps = Object.getOwnPropertyDescriptor(History.prototype, 'pushState');
+const rs = Object.getOwnPropertyDescriptor(History.prototype, 'replaceState');
+
+let oldPushState = history.pushState;
+let oldReplaceState = history.replaceState;
+
 /**
  * 拦截 `history.pushState()`/`history.replaceState()` 补发自定义事件
- * FIXME: 如果实例化多个 `HistoryObserver` 目前只有最后一个能拦截生效
  */
-export function interceptHistory() {
+export function interceptHistory(overwrite = false) {
   const eventTarget = new EventTarget();
-  const ps = Object.getOwnPropertyDescriptor(History.prototype, 'pushState');
-  const rs = Object.getOwnPropertyDescriptor(History.prototype, 'replaceState');
 
   if (ps && ps.configurable && typeof ps.value === 'function') {
-    const pushState = ps.value as History['pushState'];
+    oldPushState = history.pushState;
+    const pushState = overwrite
+      ? (ps.value as History['pushState'])
+      : oldPushState;
     Object.defineProperty(history, 'pushState', {
       configurable: true,
       enumerable: true,
@@ -30,11 +36,14 @@ export function interceptHistory() {
       writable: true
     });
   } else {
-    console.error('[interceptHistory] 不支持拦截 `history.pushState()`');
+    console.error('[history-interceptor] 不支持拦截 `history.pushState()`');
   }
 
   if (rs && rs.configurable && typeof rs.value === 'function') {
-    const replaceState = rs.value as History['replaceState'];
+    oldReplaceState = history.replaceState;
+    const replaceState = overwrite
+      ? (rs.value as History['replaceState'])
+      : oldReplaceState;
     Object.defineProperty(history, 'replaceState', {
       configurable: true,
       enumerable: true,
@@ -54,7 +63,7 @@ export function interceptHistory() {
       writable: true
     });
   } else {
-    console.error('[interceptHistory] 不支持拦截 `history.replaceState()`');
+    console.error('[history-interceptor] 不支持拦截 `history.replaceState()`');
   }
 
   return eventTarget;
@@ -62,15 +71,13 @@ export function interceptHistory() {
 
 /**
  * 恢复 `history.pushState()`/`history.replaceState()` 原始行为
- * NOTE: 注意这样会销毁掉所有对 `pushState`/`replaceState` 的拦截操作，
- * 超出 `interceptHistory()` 的范围。
  */
-export function undoInterceptHistory() {
-  const ps = Object.getOwnPropertyDescriptor(History.prototype, 'pushState');
-  const rs = Object.getOwnPropertyDescriptor(History.prototype, 'replaceState');
-
+export function undoInterceptHistory(overwrite = false) {
   if (ps && ps.configurable && typeof ps.value === 'function') {
-    const pushState = ps.value as History['pushState'];
+    oldPushState = history.pushState;
+    const pushState = overwrite
+      ? (ps.value as History['pushState'])
+      : oldPushState;
     Object.defineProperty(history, 'pushState', {
       configurable: true,
       enumerable: true,
@@ -78,11 +85,14 @@ export function undoInterceptHistory() {
       writable: true
     });
   } else {
-    console.error('[undoInterceptHistory] 不支持拦截 `history.pushState()`');
+    console.error('[history-interceptor] 不支持拦截 `history.pushState()`');
   }
 
   if (rs && rs.configurable && typeof rs.value === 'function') {
-    const replaceState = rs.value as History['replaceState'];
+    oldReplaceState = history.replaceState;
+    const replaceState = overwrite
+      ? (rs.value as History['replaceState'])
+      : oldReplaceState;
     Object.defineProperty(history, 'replaceState', {
       configurable: true,
       enumerable: true,
@@ -90,6 +100,6 @@ export function undoInterceptHistory() {
       writable: true
     });
   } else {
-    console.error('[undoInterceptHistory] 不支持拦截 `history.replaceState()`');
+    console.error('[history-interceptor] 不支持拦截 `history.replaceState()`');
   }
 }
