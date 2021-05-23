@@ -70,6 +70,10 @@ export class HistoryObserver {
 
   /**
    * 监听 `popstate` 事件
+   * - `history.back()`
+   * - `history.forward()`
+   * - `history.go()`
+   * - `location.hash = newHash`
    */
   private onPopStateInternal = (event: PopStateEvent) => {
     const type = 'popstate';
