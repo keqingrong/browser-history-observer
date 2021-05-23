@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.3.0 (2021-05-23)
+
+1. Add overwrite option to interceptors
+
 ## v0.2.0 (2021-05-17)
 
 1. Fix `this` is `undefined` in `this.emit()`

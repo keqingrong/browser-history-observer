@@ -1,6 +1,6 @@
 {
   "name": "browser-history-observer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Observer for HTML5 History API",
   "module": "dist/browser-history-observer.esm.js",
   "main": "dist/index.js",
